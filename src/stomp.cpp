@@ -241,19 +241,20 @@ bool Stomp::solve(const Eigen::MatrixXd& initial_parameters, Eigen::MatrixXd& pa
   parameters_valid_prev_ = parameters_valid_;
   while (current_iteration_ <= config_.num_iterations && runSingleIteration())
   {
-    CONSOLE_BRIDGE_logDebug("STOMP completed iteration %i with cost %f", current_iteration_, current_lowest_cost_);
+    CONSOLE_BRIDGE_logInform("STOMP completed iteration %i with cost %f", current_iteration_, current_lowest_cost_);
 
     if (parameters_valid_)
     {
-      CONSOLE_BRIDGE_logDebug("Found valid solution, will iterate %i more time(s) ",
+      CONSOLE_BRIDGE_logInform("Found valid solution, will iterate %i more time(s) ",
                               config_.num_iterations_after_valid - valid_iterations);
 
       valid_iterations++;
+      parameters_optimized = parameters_optimized_;
     }
-    else
-    {
-      valid_iterations = 0;
-    }
+    // else
+    // {
+    //   valid_iterations = 0;
+    // }
 
     if (valid_iterations > config_.num_iterations_after_valid)
     {
@@ -276,12 +277,11 @@ bool Stomp::solve(const Eigen::MatrixXd& initial_parameters, Eigen::MatrixXd& pa
       CONSOLE_BRIDGE_logError("Stomp was terminated");
   }
 
-  parameters_optimized = parameters_optimized_;
 
   // notifying task
   task_->done(parameters_valid_, current_iteration_, current_lowest_cost_, parameters_optimized);
 
-  return parameters_valid_;
+  return valid_iterations>0;
 }
 
 bool Stomp::resetVariables()
